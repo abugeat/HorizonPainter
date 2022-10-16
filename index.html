@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Horizon Painter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <input id = "inputfile" type="file" accept=".stl,.glb,.obj,.ifc" style = "display: none;"/>
+    <div id="content"></div>
+    <script type="module" src="./bundle.js"></script>
+    <!-- <div id = "info" >
+        <div id = "info-text">
+            This tool generates a mesh of a hemisphere composed of a given number of patches according to the Beckers partition method. The patches of the produced mesh have the same solid angle and the best possible aspect ratio. (See "About" section).
+        </div>
+    </div> -->
+</body>
+</html>
