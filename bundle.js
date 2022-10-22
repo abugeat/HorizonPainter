@@ -47230,10 +47230,10 @@ function init() {
 	// scene.fog = new THREE.Fog( 0x263238 / 2, 20, 60 );
 
     // ambient light
-	const light = new DirectionalLight( 0xffffff, 0.5 );
-	light.position.set( 1, 1, 1 );
+	const light = new DirectionalLight( 0xffffff, 0.75 );
+	light.position.set( 100, 100, 100 );
 	scene.add( light );
-	scene.add( new AmbientLight( 0xffffff, 0.4 ) );
+	scene.add( new AmbientLight( 0xffffff, 0.5 ) );
 
 	// geometry setup
 	const radius = 1;
@@ -47256,7 +47256,7 @@ function init() {
 
 	// camera setup
 	camera = new PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 50 );
-	camera.position.z = 40;
+	// camera.position.set(0, 10, 10) ;
 	camera.far = 100000;
 	camera.updateProjectionMatrix();
 
@@ -47418,7 +47418,7 @@ function loadModel(url, fileExt) {
 				containerObj.add( mesh );
 
 	
-				camera.position.set( 0, 40, -60 );
+				camera.position.set( 0, 40, 60 );
 				controls.target.set( 0, 0, 0 );
 				controls.update();
 	
