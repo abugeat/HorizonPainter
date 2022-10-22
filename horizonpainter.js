@@ -12,6 +12,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 
+import * as d3 from "d3";
+// import * as d3geoprojection from "d3-geo-projection";
+
 import * as beck from "./beckersfunctions.js";
 
 
@@ -21,6 +24,9 @@ THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 
 const bgColor = 0x000000;
 
+
+
+// tree
 let renderer, scene, camera, controls;
 let mesh, geometry, material, containerObj;
 let transcontrols;
@@ -34,6 +40,12 @@ const sphere = new THREE.SphereGeometry( 0.25, 20, 20 );
 // const cylinder = new THREE.CylinderGeometry( 0.01, 0.01 );
 // const pointDist = 25;
 
+//
+let width, height, size, box;
+let projection, geoGenerator;
+let geojson;
+
+
 
 const params = {
 	raycasters: {
@@ -45,6 +57,7 @@ const params = {
 init();
 render();
 updateFromOptions();
+initHemi();
 // render();
 
 
@@ -160,8 +173,6 @@ function addKnot() {
 	// containerObj.add( mesh );
 
 }
-
-
 
 function updateFromOptions() {
 
@@ -435,6 +446,89 @@ function addRaycasterNew(origin,direction) {
 }
 
 
+
+
+
+// hemisphere mesh
+
+
+
+function initHemi() {
+    
+    // lil-gui
+
+    getShape();
+
+    // setProjandgeoGene();
+	projection = d3.geoAzimuthalEqualArea()
+                .scale(size / 3 ) //.scale(size/(1.414213*2))
+                .rotate([0, -90])
+                .translate([size / 2, size / 2]);
+	geoGenerator = d3.geoPath()
+		.projection(projection);
+
+    makegeojson();
+
+    update(geojson);
+}
+ 
+function getShape() {
+    // resize div content and get size
+    box = document.getElementById('content');
+	console.log(box);
+    width = box.offsetWidth;
+    height = box.offsetHeight;
+    size = Math.min(width,height);
+	console.log(size); 
+    box.style.width = size+"px"; 
+    box.style.height = size+"px";
+
+    // create svg in div content
+    d3.select("#content").append("svg").attr("id","svg").attr("width","100%").attr("height","100%");
+	d3.select("#svg").append('g').attr("class","map");
+}
+
+function resizeHemi() {
+    
+	d3.select('#svg').remove();
+    
+	getShape();  
+
+    // setProjandgeoGene();
+	projection = d3.geoAzimuthalEqualArea()
+                .scale(size / 3 ) //.scale(size/(1.414213*2))
+                .rotate([0, -90])
+                .translate([size / 2, size / 2]);
+	geoGenerator = d3.geoPath()
+		.projection(projection);
+		
+    makegeojson();
+    update(geojson);
+}
+
+function makegeojson() {
+    geojson = {
+        "type": "FeatureCollection",
+        "features": beck.beckersGeojsonFeature(params.raycasters.count),
+    };
+}
+  
+function update(geojson) {
+    let u = d3.select('#content g.map')
+        .selectAll('path')
+        .data(geojson.features)
+        // .attr("d",)
+        .enter()
+        .append('path')  
+        .attr('d', geoGenerator)
+        .attr('stroke', 'black')
+        // .attr("fill", 'rgb(100,100,100)');
+        .attr("fill", function (d) {
+            // return 'rgb('+(1-(d.id/params.patchnumber))*255+','+(1-(d.id/params.patchnumber))*255+','+(1-(d.id/params.patchnumber))*255+')';
+            return 'rgba(255,255,255,1)';
+
+        });
+}
 
 
 
