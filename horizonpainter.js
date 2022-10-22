@@ -53,18 +53,43 @@ let svfMeshValues;
 
 
 const params = {
-	raysnum: 1000,
+	raysnum: 2000,
 	transcontrolsvisible: true,
 	poisize: 5.0,
 	impactvisible: true,
 
 };
 
-init();
-render();
-updateFromOptions();
-initHemi();
 
+init();
+// console.log("hello");
+// // // render();
+loadModel("cordoue.glb","glb");
+
+// updateFromOptions();
+
+
+// start();
+
+// async function start() {
+// 	const result = await loadModel("cordoue.glb","glb");
+// 	// updateFromOptions();
+// 	init();
+// 	updateFromOptions();
+// 	initHemi();
+// 	// updateFromOptions();
+
+// 	// rayCasterObjects.forEach( f => f.update() );
+// 	// console.log("hi");
+// 	// // await init();
+// 	// // // do something else here after firstFunction completes
+// 	// // await render();
+// 	// // await updateFromOptions();
+// 	// // renderer.render( scene, camera );
+// 	// // await initHemi();
+// 	// renderer.render( scene, camera );
+
+// };
 
 
 function init() {
@@ -96,15 +121,19 @@ function init() {
 	const radialSegments = 100;
 
 	containerObj = new THREE.Object3D();
-	geometry = new THREE.TorusKnotGeometry( radius, tube, tubularSegments, radialSegments );
+	// geometry = new THREE.TorusKnotGeometry( radius, tube, tubularSegments, radialSegments );
 	// const knotGeometry = new THREE.TorusKnotGeometry(radius, tube, tubularSegments, radialSegments);
 	material = new THREE.MeshPhongMaterial( { color: 0x999999 , side: THREE.DoubleSide} );
 	// containerObj.scale.multiplyScalar( 0.10 );
 	// containerObj.rotation.x = 10.989999999999943;
 	// containerObj.rotation.y = 10.989999999999943;
 	scene.add( containerObj );
-    addKnot();
 
+    
+	
+	
+	// addKnot();
+	// loadModel("cordoue.glb","glb");
 	
 
 
@@ -293,7 +322,7 @@ function render() {
 
 function loadModel(url, fileExt) {
 	let loader;
-
+	let result;
 	switch (fileExt) {
 		case "glb":
 			loader = new GLTFLoader();
@@ -318,12 +347,25 @@ function loadModel(url, fileExt) {
 
 				// scene.add( mesh );
 				knots.push( mesh );
+				geometry = mesh.geometry;
 				containerObj.add( mesh );
 
+				console.time( 'computing bounds tree' );
+				geometry.computeBoundsTree( {
+					// maxLeafTris: 5,
+					strategy: parseFloat( SAH ),
+				} );
+				geometry.boundsTree.splitStrategy = SAH;
+				console.timeEnd( 'computing bounds tree' );
+				result = mesh;
 	
 				camera.position.set( -45, 20, 20);
 				controls.target.set( -25, -6, 0);
 				controls.update();
+
+				updateFromOptions();
+
+				initHemi();
 	
 				// disable loading animation
 				// document.getElementById("loading").style.display = "none";
@@ -434,14 +476,15 @@ function loadModel(url, fileExt) {
 		default:
 			console.log(`Sorry, file format not recognized.`);
 	}
+
 	
 }
 
 function getCenterPoint(mesh) {
-	var geometry = mesh.geometry;
-	geometry.computeBoundingBox();
+	var geome = mesh.geometry;
+	geome.computeBoundingBox();
 	var center = new THREE.Vector3();
-	geometry.boundingBox.getCenter( center );
+	geome.boundingBox.getCenter( center );
 	mesh.localToWorld( center );
 	return center;
 }
@@ -472,8 +515,10 @@ function addRaycasterNew(origin,direction,id) {
 		update: () => {
 			raycaster.set( origVec, dirVec );
 			// raycaster.firstHitOnly = true;
-
+			// console.log(containerObj);
 			const res = raycaster.intersectObject( containerObj, true );
+			// console.log(res);
+			// console.log(dirVec);
 			if (res.length > 0) {
 				// change svfmeshvalues value
 				svfMeshValues[id] = 1.0;

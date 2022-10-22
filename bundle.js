@@ -30900,158 +30900,6 @@ class TorusGeometry extends BufferGeometry {
 
 }
 
-class TorusKnotGeometry extends BufferGeometry {
-
-	constructor( radius = 1, tube = 0.4, tubularSegments = 64, radialSegments = 8, p = 2, q = 3 ) {
-
-		super();
-
-		this.type = 'TorusKnotGeometry';
-
-		this.parameters = {
-			radius: radius,
-			tube: tube,
-			tubularSegments: tubularSegments,
-			radialSegments: radialSegments,
-			p: p,
-			q: q
-		};
-
-		tubularSegments = Math.floor( tubularSegments );
-		radialSegments = Math.floor( radialSegments );
-
-		// buffers
-
-		const indices = [];
-		const vertices = [];
-		const normals = [];
-		const uvs = [];
-
-		// helper variables
-
-		const vertex = new Vector3();
-		const normal = new Vector3();
-
-		const P1 = new Vector3();
-		const P2 = new Vector3();
-
-		const B = new Vector3();
-		const T = new Vector3();
-		const N = new Vector3();
-
-		// generate vertices, normals and uvs
-
-		for ( let i = 0; i <= tubularSegments; ++ i ) {
-
-			// the radian "u" is used to calculate the position on the torus curve of the current tubular segment
-
-			const u = i / tubularSegments * p * Math.PI * 2;
-
-			// now we calculate two points. P1 is our current position on the curve, P2 is a little farther ahead.
-			// these points are used to create a special "coordinate space", which is necessary to calculate the correct vertex positions
-
-			calculatePositionOnCurve( u, p, q, radius, P1 );
-			calculatePositionOnCurve( u + 0.01, p, q, radius, P2 );
-
-			// calculate orthonormal basis
-
-			T.subVectors( P2, P1 );
-			N.addVectors( P2, P1 );
-			B.crossVectors( T, N );
-			N.crossVectors( B, T );
-
-			// normalize B, N. T can be ignored, we don't use it
-
-			B.normalize();
-			N.normalize();
-
-			for ( let j = 0; j <= radialSegments; ++ j ) {
-
-				// now calculate the vertices. they are nothing more than an extrusion of the torus curve.
-				// because we extrude a shape in the xy-plane, there is no need to calculate a z-value.
-
-				const v = j / radialSegments * Math.PI * 2;
-				const cx = - tube * Math.cos( v );
-				const cy = tube * Math.sin( v );
-
-				// now calculate the final vertex position.
-				// first we orient the extrusion with our basis vectors, then we add it to the current position on the curve
-
-				vertex.x = P1.x + ( cx * N.x + cy * B.x );
-				vertex.y = P1.y + ( cx * N.y + cy * B.y );
-				vertex.z = P1.z + ( cx * N.z + cy * B.z );
-
-				vertices.push( vertex.x, vertex.y, vertex.z );
-
-				// normal (P1 is always the center/origin of the extrusion, thus we can use it to calculate the normal)
-
-				normal.subVectors( vertex, P1 ).normalize();
-
-				normals.push( normal.x, normal.y, normal.z );
-
-				// uv
-
-				uvs.push( i / tubularSegments );
-				uvs.push( j / radialSegments );
-
-			}
-
-		}
-
-		// generate indices
-
-		for ( let j = 1; j <= tubularSegments; j ++ ) {
-
-			for ( let i = 1; i <= radialSegments; i ++ ) {
-
-				// indices
-
-				const a = ( radialSegments + 1 ) * ( j - 1 ) + ( i - 1 );
-				const b = ( radialSegments + 1 ) * j + ( i - 1 );
-				const c = ( radialSegments + 1 ) * j + i;
-				const d = ( radialSegments + 1 ) * ( j - 1 ) + i;
-
-				// faces
-
-				indices.push( a, b, d );
-				indices.push( b, c, d );
-
-			}
-
-		}
-
-		// build geometry
-
-		this.setIndex( indices );
-		this.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
-		this.setAttribute( 'normal', new Float32BufferAttribute( normals, 3 ) );
-		this.setAttribute( 'uv', new Float32BufferAttribute( uvs, 2 ) );
-
-		// this function calculates the current position on the torus curve
-
-		function calculatePositionOnCurve( u, p, q, radius, position ) {
-
-			const cu = Math.cos( u );
-			const su = Math.sin( u );
-			const quOverP = q / p * u;
-			const cs = Math.cos( quOverP );
-
-			position.x = radius * ( 2 + cs ) * 0.5 * cu;
-			position.y = radius * ( 2 + cs ) * su * 0.5;
-			position.z = radius * Math.sin( quOverP ) * 0.5;
-
-		}
-
-	}
-
-	static fromJSON( data ) {
-
-		return new TorusKnotGeometry( data.radius, data.tube, data.tubularSegments, data.radialSegments, data.p, data.q );
-
-	}
-
-}
-
 class MeshStandardMaterial extends Material {
 
 	constructor( parameters ) {
@@ -51824,18 +51672,43 @@ let svfMeshValues;
 
 
 const params = {
-	raysnum: 1000,
+	raysnum: 2000,
 	transcontrolsvisible: true,
 	poisize: 5.0,
 	impactvisible: true,
 
 };
 
-init();
-render();
-updateFromOptions();
-initHemi();
 
+init();
+// console.log("hello");
+// // // render();
+loadModel("cordoue.glb","glb");
+
+// updateFromOptions();
+
+
+// start();
+
+// async function start() {
+// 	const result = await loadModel("cordoue.glb","glb");
+// 	// updateFromOptions();
+// 	init();
+// 	updateFromOptions();
+// 	initHemi();
+// 	// updateFromOptions();
+
+// 	// rayCasterObjects.forEach( f => f.update() );
+// 	// console.log("hi");
+// 	// // await init();
+// 	// // // do something else here after firstFunction completes
+// 	// // await render();
+// 	// // await updateFromOptions();
+// 	// // renderer.render( scene, camera );
+// 	// // await initHemi();
+// 	// renderer.render( scene, camera );
+
+// };
 
 
 function init() {
@@ -51860,22 +51733,20 @@ function init() {
 	scene.add( light );
 	scene.add( new AmbientLight( 0xffffff, 0.5 ) );
 
-	// geometry setup
-	const radius = 1;
-	const tube = 0.6;
-	const tubularSegments = 400;
-	const radialSegments = 100;
-
 	containerObj = new Object3D();
-	geometry = new TorusKnotGeometry( radius, tube, tubularSegments, radialSegments );
+	// geometry = new THREE.TorusKnotGeometry( radius, tube, tubularSegments, radialSegments );
 	// const knotGeometry = new THREE.TorusKnotGeometry(radius, tube, tubularSegments, radialSegments);
 	material = new MeshPhongMaterial( { color: 0x999999 , side: DoubleSide} );
 	// containerObj.scale.multiplyScalar( 0.10 );
 	// containerObj.rotation.x = 10.989999999999943;
 	// containerObj.rotation.y = 10.989999999999943;
 	scene.add( containerObj );
-    addKnot();
 
+    
+	
+	
+	// addKnot();
+	// loadModel("cordoue.glb","glb");
 	
 
 
@@ -51990,16 +51861,6 @@ function init() {
 
 }
 
-function addKnot() {
-	loadModel("cordoue.glb","glb");
-	// const mesh = new THREE.Mesh( geometry, material );
-	// mesh.rotation.x = Math.random() * 10;
-	// mesh.rotation.y = Math.random() * 10;
-	// knots.push( mesh );
-	// containerObj.add( mesh );
-
-}
-
 function updateFromOptions() {
 
 	svfMeshValues = new Array(params.raysnum).fill(0);
@@ -52064,7 +51925,6 @@ function render() {
 
 function loadModel(url, fileExt) {
 	let loader;
-
 	switch (fileExt) {
 		case "glb":
 			loader = new GLTFLoader();
@@ -52086,12 +51946,24 @@ function loadModel(url, fileExt) {
 				// move mesh barycenter to global origin
 				let center = getCenterPoint(mesh);
 				mesh.geometry.translate(-center.x, -center.y, -center.z);
+				geometry = mesh.geometry;
 				containerObj.add( mesh );
 
+				console.time( 'computing bounds tree' );
+				geometry.computeBoundsTree( {
+					// maxLeafTris: 5,
+					strategy: parseFloat( SAH ),
+				} );
+				geometry.boundsTree.splitStrategy = SAH;
+				console.timeEnd( 'computing bounds tree' );
 	
 				camera.position.set( -45, 20, 20);
 				controls.target.set( -25, -6, 0);
 				controls.update();
+
+				updateFromOptions();
+
+				initHemi();
 	
 				// disable loading animation
 				// document.getElementById("loading").style.display = "none";
@@ -52202,14 +52074,15 @@ function loadModel(url, fileExt) {
 		default:
 			console.log(`Sorry, file format not recognized.`);
 	}
+
 	
 }
 
 function getCenterPoint(mesh) {
-	var geometry = mesh.geometry;
-	geometry.computeBoundingBox();
+	var geome = mesh.geometry;
+	geome.computeBoundingBox();
 	var center = new Vector3();
-	geometry.boundingBox.getCenter( center );
+	geome.boundingBox.getCenter( center );
 	mesh.localToWorld( center );
 	return center;
 }
@@ -52240,8 +52113,10 @@ function addRaycasterNew(origin,direction,id) {
 		update: () => {
 			raycaster.set( origVec, dirVec );
 			// raycaster.firstHitOnly = true;
-
+			// console.log(containerObj);
 			const res = raycaster.intersectObject( containerObj, true );
+			// console.log(res);
+			// console.log(dirVec);
 			if (res.length > 0) {
 				// change svfmeshvalues value
 				svfMeshValues[id] = 1.0;
