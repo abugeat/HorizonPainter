@@ -33,9 +33,13 @@ let transcontrols;
 let poi;
 const knots = [];
 const rayCasterObjects = [];
+const materialhit = new THREE.MeshBasicMaterial( { color: 0xff6347, transparent: true, opacity:0.5 } );
+const materialrays = new THREE.MeshBasicMaterial( { color: 0xff6347, transparent: true, opacity:0.5 } );
+
 
 // Create ray casters in the scene
 const raycaster = new THREE.Raycaster();
+raycaster.firstHitOnly = true;
 const sphere = new THREE.SphereGeometry( 0.25, 20, 20 );
 // const cylinder = new THREE.CylinderGeometry( 0.01, 0.01 );
 // const pointDist = 25;
@@ -44,13 +48,15 @@ const sphere = new THREE.SphereGeometry( 0.25, 20, 20 );
 let width, height, size, box;
 let projection, geoGenerator;
 let geojson;
+let svfMeshValues;
 
 
 
 const params = {
-	raycasters: {
-		count: 150,
-	},
+	raysnum: 1000,
+	transcontrolsvisible: true,
+	poisize: 5.0,
+	impactvisible: true,
 
 };
 
@@ -58,10 +64,12 @@ init();
 render();
 updateFromOptions();
 initHemi();
-// render();
+
 
 
 function init() {
+
+	
 
 	// renderer setup
 	renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -77,6 +85,7 @@ function init() {
     // ambient light
 	const light = new THREE.DirectionalLight( 0xffffff, 0.75 );
 	light.position.set( 100, 100, 100 );
+	scene.background = new THREE.Color( 0xffffff );
 	scene.add( light );
 	scene.add( new THREE.AmbientLight( 0xffffff, 0.5 ) );
 
@@ -108,7 +117,7 @@ function init() {
 	// control setup
 	controls = new OrbitControls( camera, renderer.domElement );
 	// controls.target.set( 25, 0, -25 );
-	controls.target.set( 0, 0, 0 );
+	controls.target.set(-25, -6, 0);
 	controls.update();
 	controls.addEventListener('change', function(){
 		renderer.render( scene, camera );
@@ -116,12 +125,11 @@ function init() {
 
 
 	//poi setup
-	const materialpoi = new THREE.MeshBasicMaterial( { color: 0x0000ff} );
+	const materialpoi = new THREE.MeshBasicMaterial( { color: 0xff6347} );
 	poi = new THREE.Mesh( sphere, materialpoi );
 	poi.scale.multiplyScalar( 5.0 );
-	poi.position.set(0, 10, 0);
+	poi.position.set(-25, -6, 0);
 	scene.add(poi);
-	console.log(poi);
 	//poi controler
 	transcontrols = new TransformControls(camera, renderer.domElement);
 	transcontrols.addEventListener( 'change', function ( event ) {
@@ -129,6 +137,10 @@ function init() {
 	} );
 	transcontrols.addEventListener( 'dragging-changed', function ( event ) {
 		controls.enabled = ! event.value;
+	} );
+	transcontrols.addEventListener( 'mouseDown', function ( event ) {
+		rayCasterObjects.forEach( f => f.remove() );
+		rayCasterObjects.splice(0, rayCasterObjects.length);
 	} );
 	transcontrols.addEventListener( 'mouseUp', function ( event ) {
 		updateFromOptions();
@@ -141,17 +153,60 @@ function init() {
 	transcontrols.attach(poi);
 	scene.add(transcontrols);
 
-
-	// Run
+	// lil-gui
 	const gui = new dat.GUI();
-	const rcFolder = gui.addFolder( 'Raycasters' );
-	rcFolder.add( params.raycasters, 'count' ).min( 1 ).max( 1000 ).step( 1 ).onChange( () => updateFromOptions() );
-	rcFolder.open();
+	gui.title("HorizonPainter");
+	const FolderComputation = gui.addFolder( 'Computation parameters' );
+	FolderComputation.add( params, 'raysnum', 10, 10000, 1).name( 'Number of rays' ).onChange( () => updateFromOptions() );
+	const FolderOptions = gui.addFolder( 'Options' );
+	FolderOptions.add( params, 'poisize', 0.1, 10, 0.01).name( 'POI size' ).onChange( () => {
+		poi.scale.multiplyScalar( params.poisize/poi.scale.x );
+		renderer.render( scene, camera );
+	});
+	FolderOptions.add( poi.position, 'x').name( 'POI x' ).listen().onFinishChange( () => {
+		updateFromOptions();
+		renderer.render( scene, camera );
+	});
+	FolderOptions.add( poi.position, 'y').name( 'POI y' ).listen().onFinishChange( () => {
+		updateFromOptions();
+		renderer.render( scene, camera );
+	});
+	FolderOptions.add( poi.position, 'z').name( 'POI z' ).listen().onFinishChange( () => {
+		updateFromOptions();
+		renderer.render( scene, camera );
+	});
+	FolderOptions.add( params, 'transcontrolsvisible').name( 'POI controler').onChange( () => {
+		if (params.transcontrolsvisible) {
+			transcontrols.attach(poi);
+			renderer.render( scene, camera );
+		} else {
+			transcontrols.detach(poi);
+			renderer.render( scene, camera );
+		}
+	});
+	FolderOptions.add( params, 'impactvisible').name( 'Impact points').onChange( () => {
+		if (params.impactvisible) {
+			materialhit.visible = true;
+			renderer.render( scene, camera );
+		} else {
+			materialhit.visible = false;
+			renderer.render( scene, camera );
+		}
+	});
+	FolderOptions.add( params, 'impactvisible').name( 'Rays').onChange( () => {
+		if (params.impactvisible) {
+			materialrays.visible = true;
+			renderer.render( scene, camera );
+		} else {
+			materialrays.visible = false;
+			renderer.render( scene, camera );
+		}
+	});
+
 
 	// resize eventlistener
 	window.addEventListener( 'resize', function () {
-
-		console.log("resize");
+		resizeHemi();
 		
 		camera.aspect = window.innerWidth / window.innerHeight;
 		camera.updateProjectionMatrix();
@@ -176,34 +231,35 @@ function addKnot() {
 
 function updateFromOptions() {
 
+	svfMeshValues = new Array(params.raysnum).fill(0);
+
 	rayCasterObjects.forEach( f => f.remove() );
 	rayCasterObjects.splice(0, rayCasterObjects.length);
 
 	// Update raycaster count
-	while ( rayCasterObjects.length > params.raycasters.count ) {
+	while ( rayCasterObjects.length > params.raysnum ) {
 
 		rayCasterObjects.pop().remove();
 
 	}
 
-	// while ( rayCasterObjects.length < params.raycasters.count ) {
+	// while ( rayCasterObjects.length < params.raysnum ) {
 
 	// 	addRaycaster();
 
 	// }
 
 	// list of rays directions
-	let beckmsh = beck.hemi_equi_LMTV(beck.inc(params.raycasters.count));
+	let beckmsh = beck.hemi_equi_LMTV(beck.inc(params.raysnum));
 	let directions = beckmsh.directions;
 	// origin
 	let poiorigin = poi.position;
 
 	for (let r = 0; r<directions.length; r++) {
-		addRaycasterNew(poiorigin,directions[r]);
+		addRaycasterNew(poiorigin,directions[r],r);
 	}
 
 	if ( ! geometry ) {
-        console.log("! geometry");
 		return;
 	}
 
@@ -219,8 +275,9 @@ function updateFromOptions() {
 
 	}
 
-
     render();
+
+	resizeHemi();
 
 }
 
@@ -228,7 +285,7 @@ function render() {
 
 
 	// renderer.render( scene, camera );
-	rayCasterObjects.forEach( f => f.update() );
+	// rayCasterObjects.forEach( f => f.update() );
 	renderer.render( scene, camera );
 
 
@@ -264,8 +321,8 @@ function loadModel(url, fileExt) {
 				containerObj.add( mesh );
 
 	
-				camera.position.set( 0, 40, 60 );
-				controls.target.set( 0, 0, 0 );
+				camera.position.set( -45, 20, 20);
+				controls.target.set( -25, -6, 0);
 				controls.update();
 	
 				// disable loading animation
@@ -389,8 +446,8 @@ function getCenterPoint(mesh) {
 	return center;
 }
 
-function addRaycasterNew(origin,direction) {
-	
+function addRaycasterNew(origin,direction,id) {
+
 	// reusable vectors
 	const origVec = origin;
 
@@ -403,33 +460,31 @@ function addRaycasterNew(origin,direction) {
 	// Objects
 	const objRay = new THREE.Object3D();
 	// Hit ball
-	const materialhit = new THREE.MeshBasicMaterial( { color: 0xff00ff, transparent: true, opacity:0.5 } );
 	const hitMesh = new THREE.Mesh( sphere, materialhit );
 	hitMesh.scale.multiplyScalar( 1.0 );
 	// objRay.add( hitMesh );
 	// origin ball
-	const material = new THREE.MeshBasicMaterial( { color: 0x00ffff } );
 	const origMesh = new THREE.Mesh( sphere, material );	
 	origMesh.scale.multiplyScalar( 1.0 );
 
 	// fill rayCasterObjects list 
 	rayCasterObjects.push( {
 		update: () => {
-
 			raycaster.set( origVec, dirVec );
-			raycaster.firstHitOnly = true;
+			// raycaster.firstHitOnly = true;
 
 			const res = raycaster.intersectObject( containerObj, true );
-			console.log('raytrace');
 			if (res.length > 0) {
+				// change svfmeshvalues value
+				svfMeshValues[id] = 1.0;
+
 				// hitPoint
 				hitMesh.position.set(res[0].point.x, res[0].point.y, res[0].point.z);
 				objRay.add( hitMesh );
 
 				// rayline
 				const geometryLine = new THREE.BufferGeometry().setFromPoints( [origVec, res[0].point] );
-				const materialLine = new THREE.LineBasicMaterial( { color: 0x0000ff } );
-				const line = new THREE.Line( geometryLine, materialhit );
+				const line = new THREE.Line( geometryLine, materialrays );
 				objRay.add( line );
 
 				// add to scene
@@ -443,6 +498,9 @@ function addRaycasterNew(origin,direction) {
 
 		}
 	});
+
+	rayCasterObjects[id].update();
+
 }
 
 
@@ -454,7 +512,7 @@ function addRaycasterNew(origin,direction) {
 
 
 function initHemi() {
-    
+	console.log('initHemi');
     // lil-gui
 
     getShape();
@@ -473,15 +531,16 @@ function initHemi() {
 }
  
 function getShape() {
+	console.log('getShape');
+	d3.select('#svg').remove();
+
     // resize div content and get size
     box = document.getElementById('content');
-	console.log(box);
     width = box.offsetWidth;
     height = box.offsetHeight;
     size = Math.min(width,height);
-	console.log(size); 
-    box.style.width = size+"px"; 
-    box.style.height = size+"px";
+    // box.style.width = size+"px"; 
+    // box.style.height = size+"px";
 
     // create svg in div content
     d3.select("#content").append("svg").attr("id","svg").attr("width","100%").attr("height","100%");
@@ -489,9 +548,7 @@ function getShape() {
 }
 
 function resizeHemi() {
-    
-	d3.select('#svg').remove();
-    
+	console.log('resizeHemi');
 	getShape();  
 
     // setProjandgeoGene();
@@ -509,11 +566,12 @@ function resizeHemi() {
 function makegeojson() {
     geojson = {
         "type": "FeatureCollection",
-        "features": beck.beckersGeojsonFeature(params.raycasters.count),
+        "features": beck.beckersGeojsonFeature(params.raysnum),
     };
 }
   
 function update(geojson) {
+	console.log('updategeojson');
     let u = d3.select('#content g.map')
         .selectAll('path')
         .data(geojson.features)
@@ -521,11 +579,25 @@ function update(geojson) {
         .enter()
         .append('path')  
         .attr('d', geoGenerator)
-        .attr('stroke', 'black')
+        // .attr('stroke', 'white')
         // .attr("fill", 'rgb(100,100,100)');
+		.attr("stroke", function (d) {
+			let colorfactor = svfMeshValues[d.id];
+			let color = 'rgba('+255+','+(255-((255-99)*colorfactor))+','+(255-((255-71)*colorfactor))+',1)';
+			return color;
+            // return 'rgba('+color+','+color+','+color+',1)';
+			// return 'rgb('+(1-(d.id/params.patchnumber))*255+','+(1-(d.id/params.patchnumber))*255+','+(1-(d.id/params.patchnumber))*255+')';
+            // return 'rgba(255,255,255,1)';
+
+        })
         .attr("fill", function (d) {
-            // return 'rgb('+(1-(d.id/params.patchnumber))*255+','+(1-(d.id/params.patchnumber))*255+','+(1-(d.id/params.patchnumber))*255+')';
-            return 'rgba(255,255,255,1)';
+			let colorfactor = svfMeshValues[d.id];
+			let color = 'rgba('+255+','+(255-((255-99)*colorfactor))+','+(255-((255-71)*colorfactor))+',1)';
+			return color;
+			// let color = (1-0.75*svfMeshValues[d.id])*255;
+            // return 'rgba('+color+','+color+','+color+',1)';
+			// return 'rgb('+(1-(d.id/params.patchnumber))*255+','+(1-(d.id/params.patchnumber))*255+','+(1-(d.id/params.patchnumber))*255+')';
+            // return 'rgba(255,255,255,1)';
 
         });
 }

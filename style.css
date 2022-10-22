@@ -20,3 +20,9 @@ body {
     /* z-index:2; */
     /* background-color: blue; */
 }
+
+.lil-gui {
+	--title-background-color: #FF6347;
+	--font-family: monospace;
+	--font-family-mono: monospace;
+}

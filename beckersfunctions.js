@@ -186,7 +186,7 @@ export function hemi_equi_LMTV(nucel) {
 
     // direction of each patch (middle) xyz x:east y:north z:up
     for (let i = 0; i <nmesh; i++) {
-        directions[i] = [-Math.sin(lon[i])*Math.cos(lat[i]),  Math.sin(lat[i]),  Math.cos(lon[i])*Math.cos(lat[i])];
+        directions[i] = [-Math.sin(lon[i])*Math.cos(lat[i]),  Math.sin(lat[i]),  -Math.cos(lon[i])*Math.cos(lat[i])];
     }
 
     let bmesh = {
