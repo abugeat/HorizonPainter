@@ -51677,6 +51677,7 @@ const params = {
 	poisize: 5.0,
 	impactvisible: true,
 	saveSvg: () => saveSvg(),
+	saveIm: () => saveIm(),
 };
 
 
@@ -51707,6 +51708,7 @@ loadModel("cordoue.glb","glb");
 // 	// renderer.render( scene, camera );
 
 // };
+
 
 
 function init() {
@@ -51765,7 +51767,7 @@ function init() {
 
 
 	//poi setup
-	const materialpoi = new MeshBasicMaterial( { color: 0xff6347} );
+	const materialpoi = new MeshBasicMaterial( { color: 0xb24531} );
 	poi = new Mesh( sphere, materialpoi );
 	poi.scale.multiplyScalar( 5.0 );
 	poi.position.set(-25, -6, 0);
@@ -51844,7 +51846,7 @@ function init() {
 	});
 	const folderExport = gui.addFolder( 'Export' );
 	folderExport.add( params, 'saveSvg').name( 'Save projection as .SVG' );
-
+	folderExport.add( params, "saveIm").name( 'Save 3D view as .PNG' );
 
 	// resize eventlistener
 	window.addEventListener( 'resize', function () {
@@ -52102,11 +52104,11 @@ function addRaycasterNew(origin,direction,id) {
 	const objRay = new Object3D();
 	// Hit ball
 	const hitMesh = new Mesh( sphere, materialhit );
-	hitMesh.scale.multiplyScalar( 1.0 );
+	hitMesh.scale.multiplyScalar( 0.5 );
 	// objRay.add( hitMesh );
 	// origin ball
-	const origMesh = new Mesh( sphere, material );	
-	origMesh.scale.multiplyScalar( 1.0 );
+	// const origMesh = new THREE.Mesh( sphere, material );	
+	// origMesh.scale.multiplyScalar( 1.0 );
 
 	// fill rayCasterObjects list 
 	rayCasterObjects.push( {
@@ -52146,6 +52148,17 @@ function addRaycasterNew(origin,direction,id) {
 
 }
 
+function saveIm() {
+	renderer.render(scene, camera); 
+	requestAnimationFrame(render);
+	// 
+	let imgData = renderer.domElement.toDataURL();
+	// getImageData = false;
+	const a = document.createElement("a");
+	a.href = imgData.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+	a.download = "image.png";
+	a.click();
+}
 
 
 
