@@ -57,13 +57,11 @@ const params = {
 	transcontrolsvisible: true,
 	poisize: 5.0,
 	impactvisible: true,
-
+	saveSvg: () => saveSvg(),
 };
 
 
 init();
-// console.log("hello");
-// // // render();
 loadModel("cordoue.glb","glb");
 
 // updateFromOptions();
@@ -185,26 +183,26 @@ function init() {
 	// lil-gui
 	const gui = new dat.GUI();
 	gui.title("HorizonPainter");
-	const FolderComputation = gui.addFolder( 'Computation parameters' );
-	FolderComputation.add( params, 'raysnum', 10, 10000, 1).name( 'Number of rays' ).onChange( () => updateFromOptions() );
-	const FolderOptions = gui.addFolder( 'Options' );
-	FolderOptions.add( params, 'poisize', 0.1, 10, 0.01).name( 'POI size' ).onChange( () => {
+	const folderComputation = gui.addFolder( 'Computation parameters' );
+	folderComputation.add( params, 'raysnum', 10, 10000, 1).name( 'Number of rays' ).onChange( () => updateFromOptions() );
+	const folderOptions = gui.addFolder( 'Options' );
+	folderOptions.add( params, 'poisize', 0.1, 10, 0.01).name( 'POI size' ).onChange( () => {
 		poi.scale.multiplyScalar( params.poisize/poi.scale.x );
 		renderer.render( scene, camera );
 	});
-	FolderOptions.add( poi.position, 'x').name( 'POI x' ).listen().onFinishChange( () => {
+	folderOptions.add( poi.position, 'x').name( 'POI x' ).listen().onFinishChange( () => {
 		updateFromOptions();
 		renderer.render( scene, camera );
 	});
-	FolderOptions.add( poi.position, 'y').name( 'POI y' ).listen().onFinishChange( () => {
+	folderOptions.add( poi.position, 'y').name( 'POI y' ).listen().onFinishChange( () => {
 		updateFromOptions();
 		renderer.render( scene, camera );
 	});
-	FolderOptions.add( poi.position, 'z').name( 'POI z' ).listen().onFinishChange( () => {
+	folderOptions.add( poi.position, 'z').name( 'POI z' ).listen().onFinishChange( () => {
 		updateFromOptions();
 		renderer.render( scene, camera );
 	});
-	FolderOptions.add( params, 'transcontrolsvisible').name( 'POI controler').onChange( () => {
+	folderOptions.add( params, 'transcontrolsvisible').name( 'POI controler').onChange( () => {
 		if (params.transcontrolsvisible) {
 			transcontrols.attach(poi);
 			renderer.render( scene, camera );
@@ -213,7 +211,7 @@ function init() {
 			renderer.render( scene, camera );
 		}
 	});
-	FolderOptions.add( params, 'impactvisible').name( 'Impact points').onChange( () => {
+	folderOptions.add( params, 'impactvisible').name( 'Impact points').onChange( () => {
 		if (params.impactvisible) {
 			materialhit.visible = true;
 			renderer.render( scene, camera );
@@ -222,7 +220,7 @@ function init() {
 			renderer.render( scene, camera );
 		}
 	});
-	FolderOptions.add( params, 'impactvisible').name( 'Rays').onChange( () => {
+	folderOptions.add( params, 'impactvisible').name( 'Rays').onChange( () => {
 		if (params.impactvisible) {
 			materialrays.visible = true;
 			renderer.render( scene, camera );
@@ -231,6 +229,8 @@ function init() {
 			renderer.render( scene, camera );
 		}
 	});
+	const folderExport = gui.addFolder( 'Export' );
+	folderExport.add( params, 'saveSvg').name( 'Save projection as .SVG' );
 
 
 	// resize eventlistener
@@ -647,7 +647,21 @@ function update(geojson) {
         });
 }
 
-
+function saveSvg() {
+    let svgEl = document.getElementById("svg");
+    let name = 'beckersmesh_abugeat.svg';
+    svgEl.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    var svgData = svgEl.outerHTML;
+    var preface = '<?xml version="1.0" standalone="no"?>\r\n';
+    var svgBlob = new Blob([preface, svgData], {type:"image/svg+xml; charset=utf-8"});
+    var svgUrl = URL.createObjectURL(svgBlob);
+    var downloadLink = document.createElement("a");
+    downloadLink.href = svgUrl;
+    downloadLink.download = name;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
 
 
 
