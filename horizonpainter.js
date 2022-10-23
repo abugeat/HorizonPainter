@@ -9,6 +9,9 @@ import {
 } from 'three-mesh-bvh';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+// import { IFCLoader } from "web-ifc-three/IFCLoader";
 import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 
@@ -53,12 +56,19 @@ let svfMeshValues;
 
 
 const params = {
+	importModel: () => document.getElementById("inputfile").click(),
+	changeModelUp: () => changeModelUp(),
+	invertModelUp: () => invertModelUp(),
 	raysnum: 2000,
 	transcontrolsvisible: true,
 	poisize: 5.0,
 	impactvisible: true,
 	saveSvg: () => saveSvg(),
 	saveIm: () => saveIm(),
+	// article: () => window.open('https://doi.org/10.1016/j.comgeo.2012.01.011', '_blank').focus(), 
+    source: () => window.open('https://github.com/abugeat/HorizonPainter/', '_blank').focus(),
+    me: () => window.open('https://www.linkedin.com/in/antoine-bugeat-452167123/', '_blank').focus(),
+
 };
 
 
@@ -185,8 +195,20 @@ function init() {
 	// lil-gui
 	const gui = new dat.GUI();
 	gui.title("HorizonPainter");
-	const folderComputation = gui.addFolder( 'Computation parameters' );
+	// lil-gui 3d Model
+	const folderModel = gui.addFolder( '3D Model' );
+	folderModel.add( params, 'importModel' ).name( 'Import your model' ).onChange( () => {
+		
+		const input = document.getElementById("inputfile");
+		input.click();
+	
+	});
+	folderModel.add( params, 'changeModelUp' ).name( 'Change model up' );
+	folderModel.add( params, 'invertModelUp' ).name( 'Invert model up' );
+	// lil-gui Calculation
+	const folderComputation = gui.addFolder( 'Calculation' );
 	folderComputation.add( params, 'raysnum', 10, 10000, 1).name( 'Number of rays' ).onChange( () => updateFromOptions() );
+	// lil-gui Options
 	const folderOptions = gui.addFolder( 'Options' );
 	folderOptions.add( params, 'poisize', 0.1, 10, 0.01).name( 'POI size' ).onChange( () => {
 		poi.scale.multiplyScalar( params.poisize/poi.scale.x );
@@ -231,10 +253,32 @@ function init() {
 			renderer.render( scene, camera );
 		}
 	});
+	// lil-gui Export
 	const folderExport = gui.addFolder( 'Export' );
 	folderExport.add( params, 'saveSvg').name( 'Save projection as .SVG' );
 	folderExport.add( params, "saveIm").name( 'Save 3D view as .PNG' );
+	// lil-gui About
+	const folderAbout = gui.addFolder( 'About' );
+    // folderAbout.add( params, 'article').name( 'Beckers partition' );
+    folderAbout.add( params, 'source').name( 'Source code' );
+    folderAbout.add( params, 'me').name( 'Me' );
 
+	// LOADER	
+	const input = document.getElementById("inputfile");
+	input.addEventListener("change", (event) => {
+		
+	  	const file = event.target.files[0];
+	  	const url = URL.createObjectURL(file);
+		const fileName = file.name;
+		const fileExt = fileName.split('.').pop();
+
+		// enable loading animation
+		// document.getElementById("loading").style.display = "flex";
+		
+		loadModel(url, fileExt);
+
+	});
+	
 	// resize eventlistener
 	window.addEventListener( 'resize', function () {
 		resizeHemi();
@@ -247,16 +291,6 @@ function init() {
 		renderer.render( scene, camera );
 	
 	}, false );
-
-}
-
-function addKnot() {
-	loadModel("cordoue.glb","glb");
-	// const mesh = new THREE.Mesh( geometry, material );
-	// mesh.rotation.x = Math.random() * 10;
-	// mesh.rotation.y = Math.random() * 10;
-	// knots.push( mesh );
-	// containerObj.add( mesh );
 
 }
 
@@ -323,8 +357,15 @@ function render() {
 }
 
 function loadModel(url, fileExt) {
+
 	let loader;
-	let result;
+
+	// enable loading animation
+	document.getElementById("loading").style.display = "flex";
+
+	// remove previous model
+	containerObj.remove(containerObj.children[0]);
+
 	switch (fileExt) {
 		case "glb":
 			loader = new GLTFLoader();
@@ -347,30 +388,24 @@ function loadModel(url, fileExt) {
 				let center = getCenterPoint(mesh);
 				mesh.geometry.translate(-center.x, -center.y, -center.z);
 
-				// scene.add( mesh );
-				knots.push( mesh );
+
+				// add new mesh
 				geometry = mesh.geometry;
 				containerObj.add( mesh );
-
-				console.time( 'computing bounds tree' );
-				geometry.computeBoundsTree( {
-					// maxLeafTris: 5,
-					strategy: parseFloat( SAH ),
-				} );
-				geometry.boundsTree.splitStrategy = SAH;
-				console.timeEnd( 'computing bounds tree' );
-				result = mesh;
 	
+				// set camera
 				camera.position.set( -45, 20, 20);
 				controls.target.set( -25, -6, 0);
 				controls.update();
+
+				letcomputeBoundsTree();
 
 				updateFromOptions();
 
 				initHemi();
 	
 				// disable loading animation
-				// document.getElementById("loading").style.display = "none";
+				document.getElementById("loading").style.display = "none";
 	
 			});
 			break;
@@ -385,15 +420,19 @@ function loadModel(url, fileExt) {
 				let center = getCenterPoint(mesh);
 				mesh.geometry.translate(-center.x, -center.y, -center.z);
 											
-				scene.add(mesh);
-
 				camera.position.set( 0, 40, -60 );
 				controls.target.set( 0, 0, 0 );
 				controls.update();
 	
-				newBVH();
-				
-				resetSamples();
+				// add new mesh
+				geometry = mesh.geometry;
+				containerObj.add( mesh );
+	
+				letcomputeBoundsTree();
+
+				updateFromOptions();
+
+				initHemi();
 
 				// disable loading animation
 				document.getElementById("loading").style.display = "none";
@@ -427,16 +466,20 @@ function loadModel(url, fileExt) {
 				// move mesh barycenter to global origin
 				let center = getCenterPoint(mesh);
 				mesh.geometry.translate(-center.x, -center.y, -center.z);
-
-				scene.add( mesh );
 	
 				camera.position.set( 0, 40, -60 );
 				controls.target.set( 0, 0, 0 );
 				controls.update();
 	
-				newBVH();
-				
-				resetSamples();
+				// add new mesh
+				geometry = mesh.geometry;
+				containerObj.add( mesh );
+
+				letcomputeBoundsTree();
+
+				updateFromOptions();
+
+				initHemi();
 
 				// disable loading animation
 				document.getElementById("loading").style.display = "none";
@@ -459,15 +502,19 @@ function loadModel(url, fileExt) {
 				let center = getCenterPoint(mesh);
 				mesh.geometry.translate(-center.x, -center.y, -center.z);
 											
-				scene.add(mesh);
-
 				camera.position.set( 0, 40, -60 );
 				controls.target.set( 0, 0, 0 );
 				controls.update();
 				
-				newBVH();
-				
-				resetSamples();
+				// add new mesh
+				geometry = mesh.geometry;
+				containerObj.add( mesh );
+	
+				letcomputeBoundsTree();
+
+				updateFromOptions();
+
+				initHemi();
 
 				// disable loading animation
 				document.getElementById("loading").style.display = "none";
@@ -491,6 +538,45 @@ function getCenterPoint(mesh) {
 	return center;
 }
 
+function changeModelUp() {
+
+	mesh.geometry.rotateX(Math.PI/2);
+	mesh.geometry.rotateY(Math.PI/2);
+
+	geometry = mesh.geometry;
+
+	letcomputeBoundsTree();
+
+	updateFromOptions();
+
+	initHemi();
+
+}
+
+function invertModelUp() {
+	
+	mesh.geometry.rotateX(Math.PI);
+	
+	geometry = mesh.geometry;
+
+	letcomputeBoundsTree();
+
+	updateFromOptions();
+
+	initHemi();
+
+}
+
+function letcomputeBoundsTree() {
+	console.time( 'computing bounds tree' );
+	geometry.computeBoundsTree( {
+		// maxLeafTris: 5,
+		strategy: parseFloat( SAH ),
+	} );
+	geometry.boundsTree.splitStrategy = SAH;
+	console.timeEnd( 'computing bounds tree' );
+}
+
 function addRaycasterNew(origin,direction,id) {
 
 	// reusable vectors
@@ -506,7 +592,7 @@ function addRaycasterNew(origin,direction,id) {
 	const objRay = new THREE.Object3D();
 	// Hit ball
 	const hitMesh = new THREE.Mesh( sphere, materialhit );
-	hitMesh.scale.multiplyScalar( 0.5 );
+	hitMesh.scale.multiplyScalar( 0.75 );
 	// objRay.add( hitMesh );
 	// origin ball
 	// const origMesh = new THREE.Mesh( sphere, material );	
