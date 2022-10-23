@@ -185,8 +185,8 @@
 			// mesh's default world transform as position(0, 0, 0),
 			// quaternion(0, 0, 0, 1) and scale(0, 0, 0)
 
-			const parent = mesh.parent;
-			if ( parent !== null ) mesh.parent = null;
+			let parent = mesh.parent;
+			if ( parent !== null ) parent = null;
 			const currentPosition = manager.allocThreeVector3();
 			const currentQuaternion = manager.allocThreeQuaternion();
 			const currentScale = manager.allocThreeVector3();
@@ -821,7 +821,7 @@
 						return new Ammo.btCapsuleShape( p.width, p.height );
 
 					default:
-						throw new Error( 'unknown shape type ' + p.shapeType );
+						throw 'unknown shape type ' + p.shapeType;
 
 				}
 
@@ -1086,6 +1086,7 @@
 
 				for ( let i = 0; i < 6; i ++ ) {
 
+					// this parameter is from http://www20.atpages.jp/katwat/three.js_r58/examples/mytest37/mmd.three.js
 					constraint.setParam( 2, 0.475, i );
 
 				}
@@ -1213,12 +1214,28 @@
 						return new THREE.BoxGeometry( param.width * 2, param.height * 2, param.depth * 2, 8, 8, 8 );
 
 					case 2:
-						return new THREE.CapsuleGeometry( param.width, param.height, 8, 16 );
+						return new createCapsuleGeometry( param.width, param.height, 16, 8 );
 
 					default:
 						return null;
 
 				}
+
+			} // copy from http://www20.atpages.jp/katwat/three.js_r58/examples/mytest37/mytest37.js?ver=20160815
+
+
+			function createCapsuleGeometry( radius, cylinderHeight, segmentsRadius, segmentsHeight ) {
+
+				var geometry = new THREE.CylinderGeometry( radius, radius, cylinderHeight, segmentsRadius, segmentsHeight, true );
+				var upperSphere = new THREE.Mesh( new THREE.SphereGeometry( radius, segmentsRadius, segmentsHeight, 0, Math.PI * 2, 0, Math.PI / 2 ) );
+				var lowerSphere = new THREE.Mesh( new THREE.SphereGeometry( radius, segmentsRadius, segmentsHeight, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2 ) );
+				upperSphere.position.set( 0, cylinderHeight / 2, 0 );
+				lowerSphere.position.set( 0, - cylinderHeight / 2, 0 );
+				upperSphere.updateMatrix();
+				lowerSphere.updateMatrix();
+				geometry.merge( upperSphere.geometry, upperSphere.matrix );
+				geometry.merge( lowerSphere.geometry, lowerSphere.matrix );
+				return geometry;
 
 			}
 

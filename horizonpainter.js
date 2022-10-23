@@ -5,13 +5,13 @@ import * as dat from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import * as THREE from 'three';
 import {
 	acceleratedRaycast, computeBoundsTree, disposeBoundsTree,
-	SAH, MeshBVHVisualizer,
+	SAH,
 } from 'three-mesh-bvh';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-// import { IFCLoader } from "web-ifc-three/IFCLoader";
+import { IFCLoader } from "web-ifc-three/IFCLoader"; 
 import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 
@@ -119,7 +119,7 @@ function init() {
 
     // ambient light
 	const light = new THREE.DirectionalLight( 0xffffff, 0.75 );
-	light.position.set( 100, 100, 100 );
+	light.position.set( 1, 2, 1.5 );
 	scene.background = new THREE.Color( 0xffffff );
 	scene.add( light );
 	scene.add( new THREE.AmbientLight( 0xffffff, 0.5 ) );

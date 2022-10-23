@@ -2,7 +2,7 @@
 
 	class ConvexGeometry extends THREE.BufferGeometry {
 
-		constructor( points = [] ) {
+		constructor( points ) {
 
 			super(); // buffers
 
@@ -11,7 +11,7 @@
 
 			if ( THREE.ConvexHull === undefined ) {
 
-				console.error( 'THREE.ConvexGeometry: ConvexGeometry relies on THREE.ConvexHull' );
+				console.error( 'THREE.ConvexBufferGeometry: ConvexBufferGeometry relies on THREE.ConvexHull' );
 
 			}
 

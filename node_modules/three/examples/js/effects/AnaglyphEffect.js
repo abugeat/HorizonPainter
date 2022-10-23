@@ -62,8 +62,8 @@
 			this.render = function ( scene, camera ) {
 
 				const currentRenderTarget = renderer.getRenderTarget();
-				if ( scene.matrixWorldAutoUpdate === true ) scene.updateMatrixWorld();
-				if ( camera.parent === null && camera.matrixWorldAutoUpdate === true ) camera.updateMatrixWorld();
+				scene.updateMatrixWorld();
+				if ( camera.parent === null ) camera.updateMatrixWorld();
 
 				_stereo.update( camera );
 
@@ -81,13 +81,10 @@
 
 			this.dispose = function () {
 
-				_renderTargetL.dispose();
-
-				_renderTargetR.dispose();
-
-				_mesh.geometry.dispose();
-
-				_mesh.material.dispose();
+				if ( _renderTargetL ) _renderTargetL.dispose();
+				if ( _renderTargetR ) _renderTargetR.dispose();
+				if ( _mesh ) _mesh.geometry.dispose();
+				if ( _material ) _material.dispose();
 
 			};
 
