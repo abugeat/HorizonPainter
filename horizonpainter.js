@@ -115,36 +115,22 @@ function init() {
 
 	// scene setup
 	scene = new THREE.Scene();
-	// scene.fog = new THREE.Fog( 0x263238 / 2, 20, 60 );
 
     // ambient light
-	const light = new THREE.DirectionalLight( 0xffffff, 0.75 );
-	light.position.set( 1, 2, 1.5 );
-	scene.background = new THREE.Color( 0xffffff );
+	const light = new THREE.DirectionalLight( 0xffffff, 1.0 );
+	light.position.set( 1, 2, 1 );
 	scene.add( light );
-	scene.add( new THREE.AmbientLight( 0xffffff, 0.5 ) );
+	const light2 = new THREE.DirectionalLight( 0xffffff, 0.75 );
+	light2.position.set( -1, 0.5, -1 );
+	scene.add( light2 );
+	// scene.add( new THREE.AmbientLight( 0xffffff, 0.5 ) );
+	scene.background = new THREE.Color( 0xffffff );
+
 
 	// geometry setup
-	const radius = 1;
-	const tube = 0.6;
-	const tubularSegments = 400;
-	const radialSegments = 100;
-
 	containerObj = new THREE.Object3D();
-	// geometry = new THREE.TorusKnotGeometry( radius, tube, tubularSegments, radialSegments );
-	// const knotGeometry = new THREE.TorusKnotGeometry(radius, tube, tubularSegments, radialSegments);
 	material = new THREE.MeshPhongMaterial( { color: 0x999999 , side: THREE.DoubleSide} );
-	// containerObj.scale.multiplyScalar( 0.10 );
-	// containerObj.rotation.x = 10.989999999999943;
-	// containerObj.rotation.y = 10.989999999999943;
 	scene.add( containerObj );
-
-    
-	
-	
-	// addKnot();
-	// loadModel("cordoue.glb","glb");
-	
 
 
 	// camera setup
@@ -375,7 +361,6 @@ function loadModel(url, fileExt) {
 				gltf.scene.traverse( c => {
 					if ( c.isMesh) { 
 						subGeoList.push(c.geometry);
-
 					}
 				} );
 
