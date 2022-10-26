@@ -59,6 +59,8 @@ const params = {
 	importModel: () => document.getElementById("inputfile").click(),
 	changeModelUp: () => changeModelUp(),
 	invertModelUp: () => invertModelUp(),
+	scaleModel10: () => scaleModel10(),
+	scaleModel01: () => scaleModel01(),
 	raysnum: 2000,
 	transcontrolsvisible: true,
 	poisize: 5.0,
@@ -191,28 +193,30 @@ function init() {
 	});
 	folderModel.add( params, 'changeModelUp' ).name( 'Change model up' );
 	folderModel.add( params, 'invertModelUp' ).name( 'Invert model up' );
+	folderModel.add( params, 'scaleModel10' ).name( 'Scale model x10' );	
+	folderModel.add( params, 'scaleModel01' ).name( 'Scale model x0.1' );	
 	// lil-gui Calculation
 	const folderComputation = gui.addFolder( 'Calculation' );
-	folderComputation.add( params, 'raysnum', 10, 10000, 1).name( 'Number of rays' ).onChange( () => updateFromOptions() );
+	folderComputation.add( params, 'raysnum', 10, 20000, 1).name( 'Number of rays' ).onChange( () => updateFromOptions() );
 	// lil-gui Options
-	const folderOptions = gui.addFolder( 'Options' );
-	folderOptions.add( params, 'poisize', 0.1, 10, 0.01).name( 'POI size' ).onChange( () => {
+	const folderPoi = gui.addFolder( 'Point Of Interset' );
+	folderPoi.add( params, 'poisize', 0.1, 10, 0.01).name( 'POI size' ).onChange( () => {
 		poi.scale.multiplyScalar( params.poisize/poi.scale.x );
 		renderer.render( scene, camera );
 	});
-	folderOptions.add( poi.position, 'x').name( 'POI x' ).listen().onFinishChange( () => {
+	folderPoi.add( poi.position, 'x').name( 'POI x' ).listen().onFinishChange( () => {
 		updateFromOptions();
 		renderer.render( scene, camera );
 	});
-	folderOptions.add( poi.position, 'y').name( 'POI y' ).listen().onFinishChange( () => {
+	folderPoi.add( poi.position, 'y').name( 'POI y' ).listen().onFinishChange( () => {
 		updateFromOptions();
 		renderer.render( scene, camera );
 	});
-	folderOptions.add( poi.position, 'z').name( 'POI z' ).listen().onFinishChange( () => {
+	folderPoi.add( poi.position, 'z').name( 'POI z' ).listen().onFinishChange( () => {
 		updateFromOptions();
 		renderer.render( scene, camera );
 	});
-	folderOptions.add( params, 'transcontrolsvisible').name( 'POI controler').onChange( () => {
+	folderPoi.add( params, 'transcontrolsvisible').name( 'POI controler').onChange( () => {
 		if (params.transcontrolsvisible) {
 			transcontrols.attach(poi);
 			renderer.render( scene, camera );
@@ -221,6 +225,8 @@ function init() {
 			renderer.render( scene, camera );
 		}
 	});
+	// lil-gui Options
+	const folderOptions = gui.addFolder( 'Options' );
 	folderOptions.add( params, 'impactvisible').name( 'Impact points').onChange( () => {
 		if (params.impactvisible) {
 			materialhit.visible = true;
@@ -541,6 +547,33 @@ function changeModelUp() {
 function invertModelUp() {
 	
 	mesh.geometry.rotateX(Math.PI);
+	
+	geometry = mesh.geometry;
+
+	letcomputeBoundsTree();
+
+	updateFromOptions();
+
+	initHemi();
+
+}
+
+function scaleModel10() {
+	
+	mesh.scale.multiplyScalar( 10 );
+	
+	geometry = mesh.geometry;
+
+	letcomputeBoundsTree();
+
+	updateFromOptions();
+
+	initHemi();
+
+}
+function scaleModel01() {
+	
+	mesh.scale.multiplyScalar( 0.1 );
 	
 	geometry = mesh.geometry;
 

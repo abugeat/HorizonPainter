@@ -48,6 +48,13 @@ body {
     -webkit-animation: spin 1s linear infinite;
 }
 
+@keyframes spin {
+    to { -webkit-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+    to { -webkit-transform: rotate(360deg); }
+}
+
 .lil-gui {
 	--title-background-color: #FF6347;
 	--font-family: monospace;
