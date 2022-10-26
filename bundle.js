@@ -112514,6 +112514,20 @@ function merge(arrays) {
   return Array.from(flatten(arrays));
 }
 
+function range(start, stop, step) {
+  start = +start, stop = +stop, step = (n = arguments.length) < 2 ? (stop = start, start = 0, 1) : n < 3 ? 1 : +step;
+
+  var i = -1,
+      n = Math.max(0, Math.ceil((stop - start) / step)) | 0,
+      range = new Array(n);
+
+  while (++i < n) {
+    range[i] = start + i * step;
+  }
+
+  return range;
+}
+
 var noop$1 = {value: () => {}};
 
 function dispatch() {
@@ -117881,8 +117895,6 @@ function saveIm() {
 
 
 function initHemi() {
-	console.log('initHemi');
-    // lil-gui
 
     getShape();
 
@@ -117900,7 +117912,7 @@ function initHemi() {
 }
  
 function getShape() {
-	console.log('getShape');
+
 	select('#svg').remove();
 
     // resize div content and get size
@@ -117914,10 +117926,11 @@ function getShape() {
     // create svg in div content
     select("#content").append("svg").attr("id","svg").attr("width","100%").attr("height","100%");
 	select("#svg").append('g').attr("class","map");
+
 }
 
 function resizeHemi() {
-	console.log('resizeHemi');
+
 	getShape();  
 
     // setProjandgeoGene();
@@ -117927,6 +117940,7 @@ function resizeHemi() {
                 .translate([size / 2, size / 2]);
 	geoGenerator = index()
 		.projection(projection);
+
 		
     makegeojson();
     update(geojson);
@@ -117940,8 +117954,8 @@ function makegeojson() {
 }
   
 function update(geojson) {
-	console.log('updategeojson');
-    select('#content g.map')
+
+	select('#content g.map')
         .selectAll('path')
         .data(geojson.features)
         // .attr("d",)
@@ -117969,6 +117983,25 @@ function update(geojson) {
             // return 'rgba(255,255,255,1)';
 
         });
+
+
+	// cardinals
+	var ticksAzimuth = select("#svg").append("g")
+		.attr("class", "ticks ticks--azimuth");
+	
+	ticksAzimuth.selectAll("text")
+		.data(range(0, 360, 10))
+	  	.enter().append("text")
+		.each(function(d) { 
+			var p = projection([d, +6]);
+		
+			select(this)
+				.attr("x", p[0])
+				.attr("y", p[1]);
+		})
+		.attr("dy", ".35em")
+		.text(function(d) { return d === 0 ? "S" : d === 90 ? "E" : d === 180 ? "N" : d === 270 ? "W" : "" }); //: d + "°"; });
+
 }
 
 function saveSvg() {

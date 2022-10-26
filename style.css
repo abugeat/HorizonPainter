@@ -55,6 +55,27 @@ body {
     to { -webkit-transform: rotate(360deg); }
 }
 
+#svfoutput {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 5px;
+    color: #FF6347;
+    opacity: 0.75;
+    font-family: monospace;
+    pointer-events: none;
+    white-space: pre;
+}
+
+.ticks text {
+    text-anchor: middle;
+}
+
+.ticks--azimuth text {
+    font-weight: bold;
+    /* font-size: 14px; */
+  }
+
 .lil-gui {
 	--title-background-color: #FF6347;
 	--font-family: monospace;

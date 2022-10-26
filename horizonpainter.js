@@ -681,8 +681,6 @@ function saveIm() {
 
 
 function initHemi() {
-	console.log('initHemi');
-    // lil-gui
 
     getShape();
 
@@ -700,7 +698,7 @@ function initHemi() {
 }
  
 function getShape() {
-	console.log('getShape');
+
 	d3.select('#svg').remove();
 
     // resize div content and get size
@@ -714,10 +712,11 @@ function getShape() {
     // create svg in div content
     d3.select("#content").append("svg").attr("id","svg").attr("width","100%").attr("height","100%");
 	d3.select("#svg").append('g').attr("class","map");
+
 }
 
 function resizeHemi() {
-	console.log('resizeHemi');
+
 	getShape();  
 
     // setProjandgeoGene();
@@ -727,6 +726,7 @@ function resizeHemi() {
                 .translate([size / 2, size / 2]);
 	geoGenerator = d3.geoPath()
 		.projection(projection);
+
 		
     makegeojson();
     update(geojson);
@@ -740,8 +740,8 @@ function makegeojson() {
 }
   
 function update(geojson) {
-	console.log('updategeojson');
-    let u = d3.select('#content g.map')
+
+	let u = d3.select('#content g.map')
         .selectAll('path')
         .data(geojson.features)
         // .attr("d",)
@@ -769,6 +769,25 @@ function update(geojson) {
             // return 'rgba(255,255,255,1)';
 
         });
+
+
+	// cardinals
+	var ticksAzimuth = d3.select("#svg").append("g")
+		.attr("class", "ticks ticks--azimuth");
+	
+	ticksAzimuth.selectAll("text")
+		.data(d3.range(0, 360, 10))
+	  	.enter().append("text")
+		.each(function(d) { 
+			var p = projection([d, +6]);
+		
+			d3.select(this)
+				.attr("x", p[0])
+				.attr("y", p[1]);
+		})
+		.attr("dy", ".35em")
+		.text(function(d) { return d === 0 ? "S" : d === 90 ? "E" : d === 180 ? "N" : d === 270 ? "W" : "" }); //: d + "°"; });
+
 }
 
 function saveSvg() {
