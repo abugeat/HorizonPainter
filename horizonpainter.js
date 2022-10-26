@@ -179,7 +179,8 @@ function init() {
 	} );
 	transcontrols.attach(poi);
 	scene.add(transcontrols);
-
+	
+	
 	// lil-gui
 	const gui = new dat.GUI();
 	gui.title("HorizonPainter");
@@ -194,7 +195,7 @@ function init() {
 	folderModel.add( params, 'changeModelUp' ).name( 'Change model up' );
 	folderModel.add( params, 'invertModelUp' ).name( 'Invert model up' );
 	folderModel.add( params, 'scaleModel10' ).name( 'Scale model x10' );	
-	folderModel.add( params, 'scaleModel01' ).name( 'Scale model x0.1' );	
+	folderModel.add( params, 'scaleModel01' ).name( 'Scale model /10' );	
 	// lil-gui Calculation
 	const folderComputation = gui.addFolder( 'Calculation' );
 	folderComputation.add( params, 'raysnum', 10, 20000, 1).name( 'Number of rays' ).onChange( () => updateFromOptions() );
@@ -561,8 +562,10 @@ function invertModelUp() {
 function scaleModel10() {
 	
 	mesh.scale.multiplyScalar( 10 );
-	
+
 	geometry = mesh.geometry;
+
+	renderer.render(scene, camera); 
 
 	letcomputeBoundsTree();
 
@@ -570,12 +573,16 @@ function scaleModel10() {
 
 	initHemi();
 
+
 }
+
 function scaleModel01() {
-	
+
 	mesh.scale.multiplyScalar( 0.1 );
 	
 	geometry = mesh.geometry;
+
+	renderer.render(scene, camera); 
 
 	letcomputeBoundsTree();
 
