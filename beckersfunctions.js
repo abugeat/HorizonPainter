@@ -220,15 +220,6 @@ function getnSteps(lonStart, lonEnd, lat) {
     return newSteps;
 }
 
-function circle(lat) {
-    let lon1 = [[-180, lat]];
-    for (let i=0; i<145; i++) {
-        let lon = -180 + i * 2.5;
-        lon1.push([lon, lat]);
-    }
-    return lon1.reverse();
-} 
-
 function circlepolygon(lat) {
     let lon1 = [[-180, lat]];
     let lon;

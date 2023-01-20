@@ -19,11 +19,14 @@
   },
   "homepage": "https://github.com/abugeat/HorizonPainter#readme",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "rollup": "^3.2.2"
   },
   "dependencies": {
     "d3": "^7.6.1",
+    "solar-calculator": "^0.2.1",
+    "suncalc": "^1.9.0",
     "three-mesh-bvh": "^0.5.16",
     "web-ifc": "^0.0.36",
     "web-ifc-three": "^0.0.121"

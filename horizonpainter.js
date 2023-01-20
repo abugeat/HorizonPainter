@@ -1,6 +1,7 @@
 // HorizonPainter
 
-
+// import * as solar from 'solar-calculator';
+import * as SunCalc from 'suncalc';
 import * as dat from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import * as THREE from 'three';
 import {
@@ -19,7 +20,6 @@ import * as d3 from "d3";
 // import * as d3geoprojection from "d3-geo-projection";
 
 import * as beck from "./beckersfunctions.js";
-
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
@@ -61,6 +61,7 @@ const params = {
 	invertModelUp: () => invertModelUp(),
 	scaleModel10: () => scaleModel10(),
 	scaleModel01: () => scaleModel01(),
+	latitude: 45.95,
 	raysnum: 2000,
 	transcontrolsvisible: true,
 	poisize: 5.0,
@@ -196,6 +197,9 @@ function init() {
 	folderModel.add( params, 'invertModelUp' ).name( 'Invert model up' );
 	folderModel.add( params, 'scaleModel10' ).name( 'Scale model x10' );	
 	folderModel.add( params, 'scaleModel01' ).name( 'Scale model /10' );	
+	// lil-gui Location
+	const folderLocation = gui.addFolder( 'Location' );
+	folderLocation.add( params, 'latitude', -90, 90, 0.01).name( 'Latitude' ).onChange( () => updateLocation() );
 	// lil-gui Calculation
 	const folderComputation = gui.addFolder( 'Calculation' );
 	folderComputation.add( params, 'raysnum', 10, 20000, 1).name( 'Number of rays' ).onChange( () => updateFromOptions() );
@@ -787,8 +791,110 @@ function update(geojson) {
 		})
 		.attr("dy", ".35em")
 		.text(function(d) { return d === 0 ? "S" : d === 90 ? "E" : d === 180 ? "N" : d === 270 ? "W" : "" }); //: d + "°"; });
+	
+	updateLocation();
+}
+
+function updateLocation() {
+	// remove previous solar path
+	d3.select("#svg").selectAll(".solar-path").remove();
+
+	
+	// create solar path data
+	const lon = 0;
+	const lat = params.latitude;
+
+	// equinoxe
+	let date = new Date(Date.UTC(2022, 2, 20, 12));
+	let times = SunCalc.getTimes(date, lat, lon);
+	let sunrise = times.sunrise;
+	let sunset = times.sunset;
+	let solarData_equinoxe = [];
+	let currentTime = sunrise;
+	const interval = 600000; // 10 minutes in milliseconds
+	let azialt = [];
+	while (currentTime <= sunset) {
+		const solarPosition = SunCalc.getPosition(currentTime, lat, lon);
+		if (solarPosition.altitude < 0) {
+			currentTime = new Date(currentTime.getTime() + interval);
+			continue;
+		}
+		azialt = [solarPosition.azimuth*180/Math.PI, solarPosition.altitude*180/Math.PI];
+		solarData_equinoxe.push(projection(azialt));
+		currentTime = new Date(currentTime.getTime() + interval);
+	}
+
+	// Summer solstice
+	let solarData_solstice_summer = [];
+	date = new Date(Date.UTC(2022, 5, 20, 12)); // Summer solstice 2022
+	times = SunCalc.getTimes(date, lat, lon);
+	sunrise = times.sunrise;
+	sunset = times.sunset;
+	if (isNaN(sunrise) && lat>0) {
+		sunrise = new Date(Date.UTC(2022, 5, 20, 0));
+		sunset = new Date(Date.UTC(2022, 5, 20, 24));
+	}
+	currentTime = sunrise;
+	while (currentTime <= sunset) {
+		console.log("hi");
+		const solarPosition = SunCalc.getPosition(currentTime, lat, lon);
+		if (solarPosition.altitude < 0) {
+			currentTime = new Date(currentTime.getTime() + interval);
+			continue;
+		}
+		azialt = [solarPosition.azimuth*180/Math.PI, solarPosition.altitude*180/Math.PI];
+		solarData_solstice_summer.push(projection(azialt));
+		currentTime = new Date(currentTime.getTime() + interval);
+	}
+
+	// Winter solstice
+	let solarData_solstice_winter = [];
+	date = new Date(Date.UTC(2022, 11, 20, 12)); // Winter solstice 2022
+	times = SunCalc.getTimes(date, lat, lon);
+	sunrise = times.sunrise;
+	sunset = times.sunset;
+	if (isNaN(sunrise) && lat<0) {
+		sunrise = new Date(Date.UTC(2022, 11, 20, 0));
+		sunset = new Date(Date.UTC(2022, 11, 20, 24)); // 24 hours in milliseconds
+	}
+	currentTime = sunrise;
+	while (currentTime <= sunset) {
+		const solarPosition = SunCalc.getPosition(currentTime, lat, lon);
+		if (solarPosition.altitude < 0) {
+			currentTime = new Date(currentTime.getTime() + interval);
+			continue;
+		}
+		azialt = [solarPosition.azimuth*180/Math.PI, solarPosition.altitude*180/Math.PI];
+		solarData_solstice_winter.push(projection(azialt));
+		currentTime = new Date(currentTime.getTime() + interval);
+	}
+	
+	
+	// add solar path equinoxe
+	d3.select("#svg").append("path")
+		.attr("d", d3.line()(solarData_equinoxe))
+		.attr("class", "solar-path")
+		.attr("fill", "none")
+		.attr("stroke", "grey")
+		.attr("stroke-width", 1);
+	// add solar path solstice summer
+	d3.select("#svg").append("path")
+		.attr("d", d3.line()(solarData_solstice_summer))
+		.attr("class", "solar-path")
+		.attr("fill", "none")
+		.attr("stroke", "black")
+		.attr("stroke-width", 1);
+	// add solar path solstice winter
+	d3.select("#svg").append("path")
+		.attr("d", d3.line()(solarData_solstice_winter))
+		.attr("class", "solar-path")
+		.attr("fill", "none")
+		.attr("stroke", "black")
+		.attr("stroke-width", 1);
 
 }
+
+
 
 function saveSvg() {
     let svgEl = document.getElementById("svg");
@@ -808,7 +914,8 @@ function saveSvg() {
 
 
 
-
+// solar path
+let location = [12, 40.6062]; // Barcelona
 
 
 // function addRaycaster() {
