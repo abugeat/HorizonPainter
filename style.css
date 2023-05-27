@@ -11,13 +11,46 @@ body {
     align-items: center;
 }
 
+/* fake border */
+.fake-border {
+    position: absolute;
+    background-color: #FF6347;
+}
+
+#borderN {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+}
+#borderS {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+}
+#borderW {
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 100%;
+}
+#borderE {
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 100%;
+}
+
 #content {
     position: absolute;
     top:0;
     left:0;
-    width: 33%;
-    height: 33%;
+    width: 50%;
+    height: 50%;
     overflow: hidden;
+    pointer-events: none;
+    margin: 1rem;
     /* z-index:2; */
     /* background-color: blue; */
 }

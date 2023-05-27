@@ -142,6 +142,7 @@ function init() {
 	camera.far = 100000;
 	camera.updateProjectionMatrix();
 
+	
 	// control setup
 	controls = new OrbitControls( camera, renderer.domElement );
 	// controls.target.set( 25, 0, -25 );
@@ -836,7 +837,6 @@ function updateLocation() {
 	}
 	currentTime = sunrise;
 	while (currentTime <= sunset) {
-		console.log("hi");
 		const solarPosition = SunCalc.getPosition(currentTime, lat, lon);
 		if (solarPosition.altitude < 0) {
 			currentTime = new Date(currentTime.getTime() + interval);

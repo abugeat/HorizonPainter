@@ -4,9 +4,16 @@
     <title>Horizon Painter</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="/horizonpainter.svg" type="image/svg+xml">
     <!-- <script src="https://unpkg.com/solar-calculator@0.2/dist/solar-calculator.min.js"></script> -->
 </head>
 <body>
+    <!-- border -->
+    <div id="borderN" class="fake-border"></div>
+    <div id="borderE" class="fake-border"></div>
+    <div id="borderS" class="fake-border"></div>
+    <div id="borderW" class="fake-border"></div>
+
     <input id = "inputfile" type="file" accept=".stl,.glb,.obj,.ifc" style = "display: none;"/>
     <div id="content"></div>
     <script type="module" src="./bundle.js"></script>
