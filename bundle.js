@@ -845,7 +845,7 @@ var MathUtils = /*#__PURE__*/Object.freeze({
 	setQuaternionFromProperEuler: setQuaternionFromProperEuler
 });
 
-class Vector2$1 {
+let Vector2$1 = class Vector2 {
 
 	constructor( x = 0, y = 0 ) {
 
@@ -1324,7 +1324,7 @@ class Vector2$1 {
 
 	}
 
-}
+};
 
 Vector2$1.prototype.isVector2 = true;
 
@@ -2146,7 +2146,7 @@ function serializeImage( image ) {
 
 }
 
-class Vector4$1 {
+let Vector4$1 = class Vector4 {
 
 	constructor( x = 0, y = 0, z = 0, w = 1 ) {
 
@@ -2805,7 +2805,7 @@ class Vector4$1 {
 
 	}
 
-}
+};
 
 Vector4$1.prototype.isVector4 = true;
 
@@ -3018,7 +3018,7 @@ class WebGLMultisampleRenderTarget extends WebGLRenderTarget {
 
 WebGLMultisampleRenderTarget.prototype.isWebGLMultisampleRenderTarget = true;
 
-class Quaternion$1 {
+let Quaternion$1 = class Quaternion {
 
 	constructor( x = 0, y = 0, z = 0, w = 1 ) {
 
@@ -3700,11 +3700,11 @@ class Quaternion$1 {
 
 	_onChangeCallback() {}
 
-}
+};
 
 Quaternion$1.prototype.isQuaternion = true;
 
-class Vector3$1 {
+let Vector3$1 = class Vector3 {
 
 	constructor( x = 0, y = 0, z = 0 ) {
 
@@ -4438,7 +4438,7 @@ class Vector3$1 {
 
 	}
 
-}
+};
 
 Vector3$1.prototype.isVector3 = true;
 
@@ -8671,7 +8671,7 @@ function LinearToSRGB$1( c ) {
 
 }
 
-class Color$2 {
+let Color$2 = class Color {
 
 	constructor( r, g, b ) {
 
@@ -9212,7 +9212,7 @@ class Color$2 {
 
 	}
 
-}
+};
 
 Color$2.NAMES = _colorKeywords$1;
 
@@ -9325,7 +9325,7 @@ MeshBasicMaterial.prototype.isMeshBasicMaterial = true;
 const _vector$9 = /*@__PURE__*/ new Vector3$1();
 const _vector2$1 = /*@__PURE__*/ new Vector2$1();
 
-class BufferAttribute$1 {
+let BufferAttribute$1 = class BufferAttribute {
 
 	constructor( array, itemSize, normalized ) {
 
@@ -9721,7 +9721,7 @@ class BufferAttribute$1 {
 
 	}
 
-}
+};
 
 BufferAttribute$1.prototype.isBufferAttribute = true;
 
@@ -9745,7 +9745,7 @@ class Uint32BufferAttribute extends BufferAttribute$1 {
 
 }
 
-class Float16BufferAttribute$1 extends BufferAttribute$1 {
+let Float16BufferAttribute$1 = class Float16BufferAttribute extends BufferAttribute$1 {
 
 	constructor( array, itemSize, normalized ) {
 
@@ -9753,7 +9753,7 @@ class Float16BufferAttribute$1 extends BufferAttribute$1 {
 
 	}
 
-}
+};
 
 Float16BufferAttribute$1.prototype.isFloat16BufferAttribute = true;
 
@@ -30360,11 +30360,6 @@ class PolyhedronGeometry extends BufferGeometry {
 
 }
 
-new Vector3$1();
-new Vector3$1();
-new Vector3$1();
-new Triangle();
-
 /**
  * Extensible curve object.
  *
@@ -32062,7 +32057,7 @@ class CurvePath extends Curve {
 
 }
 
-class Path$1 extends CurvePath {
+let Path$1 = class Path extends CurvePath {
 
 	constructor( points ) {
 
@@ -32245,7 +32240,7 @@ class Path$1 extends CurvePath {
 
 	}
 
-}
+};
 
 class Shape extends Path$1 {
 
@@ -45156,43 +45151,6 @@ SeparatingAxisBounds.prototype.setFromBox = ( function () {
 
 } )();
 
-( (function () {
-
-	const cacheSatBounds = new SeparatingAxisBounds();
-	return function areIntersecting( shape1, shape2 ) {
-
-		const points1 = shape1.points;
-		const satAxes1 = shape1.satAxes;
-		const satBounds1 = shape1.satBounds;
-
-		const points2 = shape2.points;
-		const satAxes2 = shape2.satAxes;
-		const satBounds2 = shape2.satBounds;
-
-		// check axes of the first shape
-		for ( let i = 0; i < 3; i ++ ) {
-
-			const sb = satBounds1[ i ];
-			const sa = satAxes1[ i ];
-			cacheSatBounds.setFromPoints( sa, points2 );
-			if ( sb.isSeparated( cacheSatBounds ) ) return false;
-
-		}
-
-		// check axes of the second shape
-		for ( let i = 0; i < 3; i ++ ) {
-
-			const sb = satBounds2[ i ];
-			const sa = satAxes2[ i ];
-			cacheSatBounds.setFromPoints( sa, points1 );
-			if ( sb.isSeparated( cacheSatBounds ) ) return false;
-
-		}
-
-	};
-
-}) )();
-
 const closestPointLineToLine = ( function () {
 
 	// https://github.com/juj/MathGeoLib/blob/master/src/Geometry/Line.cpp#L56
@@ -49891,7 +49849,7 @@ class GLTFLightsExtension {
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit
  */
-class GLTFMaterialsUnlitExtension$1 {
+let GLTFMaterialsUnlitExtension$1 = class GLTFMaterialsUnlitExtension {
 
 	constructor() {
 
@@ -49937,14 +49895,14 @@ class GLTFMaterialsUnlitExtension$1 {
 
 	}
 
-}
+};
 
 /**
  * Clearcoat Materials Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_clearcoat
  */
-class GLTFMaterialsClearcoatExtension$1 {
+let GLTFMaterialsClearcoatExtension$1 = class GLTFMaterialsClearcoatExtension {
 
 	constructor( parser ) {
 
@@ -50021,7 +49979,7 @@ class GLTFMaterialsClearcoatExtension$1 {
 
 	}
 
-}
+};
 
 /**
  * Sheen Materials Extension
@@ -50103,7 +50061,7 @@ class GLTFMaterialsSheenExtension {
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_transmission
  * Draft: https://github.com/KhronosGroup/glTF/pull/1698
  */
-class GLTFMaterialsTransmissionExtension$1 {
+let GLTFMaterialsTransmissionExtension$1 = class GLTFMaterialsTransmissionExtension {
 
 	constructor( parser ) {
 
@@ -50154,14 +50112,14 @@ class GLTFMaterialsTransmissionExtension$1 {
 
 	}
 
-}
+};
 
 /**
  * Materials Volume Extension
  *
  * Specification: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_volume
  */
-class GLTFMaterialsVolumeExtension$1 {
+let GLTFMaterialsVolumeExtension$1 = class GLTFMaterialsVolumeExtension {
 
 	constructor( parser ) {
 
@@ -50213,7 +50171,7 @@ class GLTFMaterialsVolumeExtension$1 {
 
 	}
 
-}
+};
 
 /**
  * Materials ior Extension
@@ -106343,7 +106301,7 @@ function LinearToSRGB(c) {
   return (c < 0.0031308) ? c * 12.92 : 1.055 * ( Math.pow(c, 0.41666) ) - 0.055;
 }
 
-class Color$1 {
+let Color$1 = class Color {
 
   constructor(r, g, b) {
 
@@ -106893,7 +106851,7 @@ class Color$1 {
 
   }
 
-}
+};
 
 Color$1.NAMES = _colorKeywords;
 
@@ -117533,8 +117491,6 @@ Transform.prototype = {
   }
 };
 
-new Transform(1, 0, 0);
-
 Transform.prototype;
 
 // B&B
@@ -117791,6 +117747,7 @@ function intermediatePoints(lonStart, lonEnd, nSteps, lat) {
 
 // HorizonPainter
 
+
 Mesh.prototype.raycast = acceleratedRaycast;
 BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
@@ -117956,7 +117913,7 @@ function init() {
 	const gui = new g();
 	gui.title("HorizonPainter");
 	// lil-gui 3d Model
-	const folderModel = gui.addFolder( '3D Model' );
+	const folderModel = gui.addFolder( '📥 3D Model' );
 	folderModel.add( params, 'importModel' ).name( 'Import your model' ).onChange( () => {
 		
 		const input = document.getElementById("inputfile");
@@ -117968,13 +117925,13 @@ function init() {
 	folderModel.add( params, 'scaleModel10' ).name( 'Scale model x10' );	
 	folderModel.add( params, 'scaleModel01' ).name( 'Scale model /10' );	
 	// lil-gui Location
-	const folderLocation = gui.addFolder( 'Location' );
+	const folderLocation = gui.addFolder( '🌍 Location' );
 	folderLocation.add( params, 'latitude', -90, 90, 0.01).name( 'Latitude' ).onChange( () => updateLocation() );
 	// lil-gui Calculation
-	const folderComputation = gui.addFolder( 'Calculation' );
+	const folderComputation = gui.addFolder( '🧮 Calculation' );
 	folderComputation.add( params, 'raysnum', 10, 20000, 1).name( 'Number of rays' ).onChange( () => updateFromOptions() );
 	// lil-gui Options
-	const folderPoi = gui.addFolder( 'Point Of Interset' );
+	const folderPoi = gui.addFolder( '🔴 Point Of Interset' );
 	folderPoi.add( params, 'poisize', 0.1, 10, 0.01).name( 'POI size' ).onChange( () => {
 		poi.scale.multiplyScalar( params.poisize/poi.scale.x );
 		renderer.render( scene, camera );
@@ -118001,7 +117958,7 @@ function init() {
 		}
 	});
 	// lil-gui Options
-	const folderOptions = gui.addFolder( 'Options' );
+	const folderOptions = gui.addFolder( '🎛 Options' );
 	folderOptions.add( params, 'impactvisible').name( 'Impact points').onChange( () => {
 		if (params.impactvisible) {
 			materialhit.visible = true;
@@ -118021,11 +117978,11 @@ function init() {
 		}
 	});
 	// lil-gui Export
-	const folderExport = gui.addFolder( 'Export' );
+	const folderExport = gui.addFolder( '📤 Export' );
 	folderExport.add( params, 'saveSvg').name( 'Save projection as .SVG' );
 	folderExport.add( params, "saveIm").name( 'Save 3D view as .PNG' );
 	// lil-gui About
-	const folderAbout = gui.addFolder( 'About' );
+	const folderAbout = gui.addFolder( '🔗 About' );
     // folderAbout.add( params, 'article').name( 'Beckers partition' );
     folderAbout.add( params, 'source').name( 'Source code' );
     folderAbout.add( params, 'me').name( 'Me' );

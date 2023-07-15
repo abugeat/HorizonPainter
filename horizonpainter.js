@@ -187,7 +187,7 @@ function init() {
 	const gui = new dat.GUI();
 	gui.title("HorizonPainter");
 	// lil-gui 3d Model
-	const folderModel = gui.addFolder( '3D Model' );
+	const folderModel = gui.addFolder( '📥 3D Model' );
 	folderModel.add( params, 'importModel' ).name( 'Import your model' ).onChange( () => {
 		
 		const input = document.getElementById("inputfile");
@@ -199,13 +199,13 @@ function init() {
 	folderModel.add( params, 'scaleModel10' ).name( 'Scale model x10' );	
 	folderModel.add( params, 'scaleModel01' ).name( 'Scale model /10' );	
 	// lil-gui Location
-	const folderLocation = gui.addFolder( 'Location' );
+	const folderLocation = gui.addFolder( '🌍 Location' );
 	folderLocation.add( params, 'latitude', -90, 90, 0.01).name( 'Latitude' ).onChange( () => updateLocation() );
 	// lil-gui Calculation
-	const folderComputation = gui.addFolder( 'Calculation' );
+	const folderComputation = gui.addFolder( '🧮 Calculation' );
 	folderComputation.add( params, 'raysnum', 10, 20000, 1).name( 'Number of rays' ).onChange( () => updateFromOptions() );
 	// lil-gui Options
-	const folderPoi = gui.addFolder( 'Point Of Interset' );
+	const folderPoi = gui.addFolder( '🔴 Point Of Interset' );
 	folderPoi.add( params, 'poisize', 0.1, 10, 0.01).name( 'POI size' ).onChange( () => {
 		poi.scale.multiplyScalar( params.poisize/poi.scale.x );
 		renderer.render( scene, camera );
@@ -232,7 +232,7 @@ function init() {
 		}
 	});
 	// lil-gui Options
-	const folderOptions = gui.addFolder( 'Options' );
+	const folderOptions = gui.addFolder( '🎛 Options' );
 	folderOptions.add( params, 'impactvisible').name( 'Impact points').onChange( () => {
 		if (params.impactvisible) {
 			materialhit.visible = true;
@@ -252,11 +252,11 @@ function init() {
 		}
 	});
 	// lil-gui Export
-	const folderExport = gui.addFolder( 'Export' );
+	const folderExport = gui.addFolder( '📤 Export' );
 	folderExport.add( params, 'saveSvg').name( 'Save projection as .SVG' );
 	folderExport.add( params, "saveIm").name( 'Save 3D view as .PNG' );
 	// lil-gui About
-	const folderAbout = gui.addFolder( 'About' );
+	const folderAbout = gui.addFolder( '🔗 About' );
     // folderAbout.add( params, 'article').name( 'Beckers partition' );
     folderAbout.add( params, 'source').name( 'Source code' );
     folderAbout.add( params, 'me').name( 'Me' );
