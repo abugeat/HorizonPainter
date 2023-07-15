@@ -1,6 +1,7 @@
 {
   "name": "horizonpainter",
   "version": "1.0.0",
+  "type":"module",
   "description": "",
   "main": "bundle.js",
   "scripts": {
